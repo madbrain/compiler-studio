@@ -1,0 +1,9 @@
+package $lexGen.package;
+
+public interface I${lexGen.model.name}Tokens {
+
+#foreach ($token in $lexGen.getTokens())
+	public static final int $lexGen.getTokenName($token) = $token;
+#end
+	
+}

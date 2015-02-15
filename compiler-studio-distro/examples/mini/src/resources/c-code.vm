@@ -1,0 +1,41 @@
+\#include <stdio.h>
+\#include <stdlib.h>
+\#include <string.h>
+
+#if ($cGen.isUsed("print"))
+static void print(char *str) {
+	printf("%s\n", str);
+}
+
+#end
+#if ($cGen.isUsed("i_to_s"))
+static char *i_to_s(int a) {
+	static char buffer[512];
+	int l = snprintf(buffer, 512, "%d", a);
+	char * c = malloc(l+1);
+	strcpy(c, buffer);
+	return c;
+}
+
+#end
+#if ($cGen.isUsed("str_concat"))
+static char *str_concat(char *a, char *b) {
+	char * c = malloc(strlen(a) + strlen(b) + 1);
+	strcpy(c, a);
+	strcat(c, b);
+	return c;
+}
+
+#end
+
+#foreach ($function in $cGen.functions)
+${cGen.makeType($function.returnType)} ${function.name}(#foreach ($arg in $function.arguments)$cGen.makeType($arg.type) $arg.name#if ($velocityHasNext), #end#end) {
+#foreach ($decl in $function.declarations)
+	$cGen.makeType($decl.type) $decl.name;
+#end
+#foreach ($statement in $function.statements)
+	$cGen.makeStatement($statement);
+#end
+}
+
+#end

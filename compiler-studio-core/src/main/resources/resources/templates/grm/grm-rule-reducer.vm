@@ -1,0 +1,65 @@
+package $grmGen.package;
+
+import org.xteam.cs.runtime.AstList;
+import org.xteam.cs.runtime.AstNode;
+import org.xteam.cs.runtime.IStatedLexer;
+import org.xteam.cs.runtime.IToken;
+import org.xteam.cs.runtime.Span;
+import ${grmGen.astPackage}.*;
+
+public class ${grmGen.model.name}RuleReducer implements org.xteam.cs.runtime.IRuleReducer {
+
+	private IStatedLexer lexer;
+	
+	public ${grmGen.model.name}RuleReducer(IStatedLexer lexer) {
+		this.lexer = lexer;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Object reduce(int r, Object[] values) {
+		switch (r) {
+#foreach ($rule in $grmGen.getRules())
+		case $grmGen.getRuleValue($rule): { // $rule.toString()
+#if ($grmGen.isListAction($rule.action))
+			return $grmGen.buildListAction($rule);
+#elseif ($grmGen.isNodeAction($rule.action))
+			Span span = $grmGen.buildSpan($rule);
+			return new ${rule.action.node.name}(span$grmGen.buildArgs($rule));
+#elseif ($grmGen.isLexerAction($rule.action))
+#if ($rule.action.condition >= 0)
+			if (lexer.getState() == $rule.action.condition)
+				lexer.setState($rule.action.state);
+#else
+			lexer.setState($rule.action.state);
+#end
+			return null;
+#else
+			return $grmGen.buildPropagateAction($rule.action.index);
+#end
+			}
+#end
+		}
+		throw new RuntimeException("unknown rule " + r);
+	}
+	
+	private Span span(int from, int to) {
+		return new Span(from, to-from);
+	}
+	
+	private Span span(AstNode[] left, int from, int to, AstNode[] right) {
+		for (int i = 0; i < left.length; ++i) {
+			if (left[i] != null) {
+				from = left[i].span().start();
+				break;
+			}
+		}
+		for (int i = right.length-1; i >= 0; --i) {
+			if (right[i] != null) {
+				to = right[i].span().end();
+				break;
+			}
+		}
+		return span(from, to);
+	}
+	
+}

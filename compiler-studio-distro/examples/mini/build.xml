@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="mini" default="compile">
+
+	<path id="minicp">
+		<pathelement location="bin"/>
+		<pathelement location="../../lib/commons-collections-3.2.1.jar"/>
+		<pathelement location="../../lib/commons-lang-2.4.jar"/>
+		<pathelement location="../../lib/velocity-1.6.3.jar"/>
+		<pathelement location="../../lib/compiler-studio-runtime-0.2-SNAPSHOT.jar"/>
+	</path>
+
+	<path id="csgen">
+		<pathelement location="../../lib/commons-collections-3.2.1.jar"/>
+		<pathelement location="../../lib/commons-lang-2.4.jar"/>
+		<pathelement location="../../lib/velocity-1.6.3.jar"/>
+		<pathelement location="../../lib/compiler-studio-runtime-0.2-SNAPSHOT.jar"/>
+		<pathelement location="../../lib/compiler-studio-core-0.2-SNAPSHOT.jar"/>
+	</path>
+
+	<target name="test" depends="compile">
+		<java fork="true" classpathref="minicp" classname="com.example.mini.MiniCompiler">
+			<arg value="test1.mini"/>
+		</java>
+	</target>
+
+	<target name="compile" depends="generate">
+		<mkdir dir="bin"/>
+		<javac classpathref="minicp" srcdir="src-gen" destdir="bin" source="1.6" target="1.6"/>
+		<javac classpathref="minicp" srcdir="src" destdir="bin" source="1.6" target="1.6"/>
+		<copy todir="bin">
+			<fileset dir="src-gen">
+				<exclude name="**/*.java"/>
+			</fileset>
+			<fileset dir="src">
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="generate">
+		<java fork="true" classpathref="csgen" classname="org.xteam.cs.generator.Generator">
+			<arg value="mini.cpj"/>
+		</java>
+	</target>
+
+</project>

@@ -1,0 +1,62 @@
+
+Mini {
+
+	MiniFile {
+		functions : Function*;
+	}
+
+	Function {
+		name       : Ident;
+		arguments  : Ident*;
+		statements : Statement*;
+	}
+
+	/ Statement {}
+
+	Assignment : Statement {
+		var  : Ident;
+		expr : Expr;
+	}
+
+	FunctionStatement : Statement {
+		name : Ident;
+		arguments : Expr*;
+	}
+	
+	Return : Statement {
+		expr : Expr;
+	}
+
+	/ Expr {}
+
+	/ BinaryExpr : Expr {
+		left : Expr;
+		right : Expr;
+	}
+
+	AddExpr : BinaryExpr {}
+	SubExpr : BinaryExpr {}
+	MulExpr : BinaryExpr {}
+	DivExpr : BinaryExpr {}
+
+	FunctionExpr : Expr {
+		name : Ident;
+		arguments : Expr*;
+	}
+
+	IdentExpr : Expr {
+		name : string;
+	}
+
+	IntExpr : Expr {
+		value : string;
+	}
+
+	StringExpr : Expr {
+		value : string;
+	}
+
+	Ident {
+		name : string;
+	}
+}

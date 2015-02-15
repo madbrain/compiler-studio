@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.xteam.org/cs/project">
+    <resource path="cxx.lex">
+        <property name="lexerPackage" value="lexer"/>
+        <property name="doKeywordOptimize" value="false"/>
+    </resource>
+     <resource path="cxx.grm"/>
+</project>

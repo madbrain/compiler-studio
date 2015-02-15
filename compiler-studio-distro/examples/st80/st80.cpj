@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.xteam.org/cs/project">
+    <property name="sourceFolder" value="src"/>
+    <property name="mainPackage" value="org.xteam.st80"/>
+    <resource path="st80.lex">
+        <property name="lexerPackage" value="lexer"/>
+        <property name="doKeywordOptimize" value="false"/>
+    </resource>
+    <resource path="st80.grm">
+        <property name="analysisMethod" value="LALR"/>
+        <property name="grammarPackage" value="parser"/>
+        <property name="lookahead" value="1"/>
+    </resource>
+    <resource path="st80.ast">
+        <property name="astNodeClass" value="org.xteam.cs.runtime.AstNode"/>
+        <property name="makeReflexive" value="false"/>
+        <property name="astListClass" value="org.xteam.cs.runtime.AstList"/>
+        <property name="astPackage" value="ast"/>
+    </resource>
+</project>

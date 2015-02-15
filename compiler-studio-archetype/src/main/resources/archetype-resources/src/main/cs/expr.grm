@@ -1,0 +1,32 @@
+grammar Expr;
+
+lexer Expr;
+
+ast Expr;
+
+file ::= stmt_list -> File(stmts);
+
+stmt_list ::= stmt -> AstList();
+stmt_list ::= stmt_list stmt -> AstList();
+
+stmt ::= expr -> ExprStatement(expr);
+stmt ::= ident ASSIGN expr -> AssignmentStatement(variable, expr);
+
+expr ::= add_sub_expr;
+
+add_sub_expr ::= mul_div_expr;
+add_sub_expr ::= add_sub_expr PLUS add_sub_expr -> AddExpr(left, right);
+add_sub_expr ::= add_sub_expr MINUS add_sub_expr -> SubExpr(left, right);
+
+mul_div_expr ::= unary_expr;
+mul_div_expr ::= mul_div_expr STAR  unary_expr -> MulExpr(left, right);
+mul_div_expr ::= mul_div_expr SLASH unary_expr -> DivExpr(left, right);
+
+unary_expr ::= primary_expr;
+unary_expr ::= MINUS primary_expr -> NegateExpr(expr);
+
+primary_expr ::= IDENTIFIER -> VariableExpr(name);
+primary_expr ::= INTEGER    -> IntegerExpr(value);
+primary_expr ::= LPAR expr RPAR;
+
+ident ::= IDENTIFIER -> Identifier(name);

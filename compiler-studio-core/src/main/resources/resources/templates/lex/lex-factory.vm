@@ -1,0 +1,28 @@
+package $lexGen.package;
+
+import java.io.IOException;
+
+import org.xteam.cs.runtime.DefaultToken;
+import org.xteam.cs.runtime.ILexer;
+import org.xteam.cs.runtime.IToken;
+import org.xteam.cs.runtime.ITokenFactory;
+import org.xteam.cs.runtime.IConverter;
+import org.xteam.cs.runtime.LexerTable;
+import org.xteam.cs.runtime.Span;
+import org.xteam.cs.runtime.TableBasedLexer;
+
+public class ${lexGen.model.name}LexerFactory {
+	
+	public static ILexer createLexer(IConverter converter) throws IOException {
+		return new TableBasedLexer(new LexerTable(
+			${lexGen.model.name}LexerFactory.class, "${lexGen.model.name}.ltb"),
+				converter,
+				new ITokenFactory() {
+					@Override
+					public IToken newToken(int type, Span span, Object content) {
+						return new DefaultToken(type, span.start(), span.length(), content);
+					}
+		});
+	}
+	
+}

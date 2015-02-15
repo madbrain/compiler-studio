@@ -1,0 +1,9 @@
+package $lexGen.package;
+
+public interface ${lexGen.model.name}ConvertCodes {
+	
+#foreach ($code in $lexGen.getConvertCodes())
+	public static final int $code = $lexGen.getConvertCodeValue($code);
+#end
+
+}

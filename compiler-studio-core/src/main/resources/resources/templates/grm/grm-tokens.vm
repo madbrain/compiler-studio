@@ -1,0 +1,9 @@
+package $grmGen.package;
+
+public interface I${grmGen.model.name}GrammarTokens {
+
+#foreach ($token in $grmGen.getTokens())
+	public static final int $token.name = $grmGen.getTokenValue($token);
+#end
+	
+}

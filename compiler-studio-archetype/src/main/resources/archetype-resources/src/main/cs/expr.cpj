@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.xteam.org/cs/project">
+    <property name="resourceFolder" value="rsc-gen"/>
+    <property name="sourceFolder" value="src-gen"/>
+    <property name="useResourceFolder" value="false"/>
+    <property name="mainPackage" value="${package}"/>
+    <resource path="expr.ast">
+        <property name="astNodeClass" value="org.xteam.cs.runtime.AstNode"/>
+        <property name="makeReflexive" value="false"/>
+        <property name="astListClass" value="org.xteam.cs.runtime.AstList"/>
+        <property name="astPackage" value="ast"/>
+    </resource>
+    <resource path="expr.lex">
+        <property name="lexerPackage" value="lexer"/>
+        <property name="doKeywordOptimize" value="false"/>
+    </resource>
+    <resource path="expr.grm">
+        <property name="conflictResolverMethod" value="SLR"/>
+        <property name="analysisMethod" value="LALR"/>
+        <property name="grammarPackage" value="parser"/>
+        <property name="lookahead" value="1"/>
+    </resource>
+</project>

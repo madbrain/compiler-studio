@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.xteam.compiler</groupId>
+    <artifactId>compiler-studio</artifactId>
+    <version>0.2-SNAPSHOT</version>
+  </parent>
+  <artifactId>compiler-studio-distro</artifactId>
+  <packaging>pom</packaging>
+  <name>Compiler Studio Distro</name>
+
+  <build>
+  	<plugins>
+  		<plugin>
+  			<groupId>org.apache.maven.plugins</groupId>
+  			<artifactId>maven-assembly-plugin</artifactId>
+  			<version>2.2</version>
+  			<executions>
+  				<execution>
+  					<id>distro-assembly</id>
+  					<phase>package</phase>
+  					<goals>
+  						<goal>single</goal>
+  					</goals>
+  					<configuration>
+  						<finalName>compiler-studio</finalName>
+  						<descriptors>
+  							<descriptor>src/assemble/bin.xml</descriptor>
+  						</descriptors>
+  					</configuration>
+  				</execution>
+  			</executions>
+  		</plugin>
+  	</plugins>
+  </build>
+
+  <dependencies>
+  	<dependency>
+  		<groupId>org.xteam</groupId>
+  		<artifactId>compiler-studio-gui</artifactId>
+  		<version>0.2-SNAPSHOT</version>
+  	</dependency>
+  </dependencies>
+</project>

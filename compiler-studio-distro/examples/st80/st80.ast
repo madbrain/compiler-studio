@@ -1,0 +1,125 @@
+
+St80 {
+	
+	MethodDeclaration {
+		header : MethodHeader;
+		code : ExecutableCode;
+	}
+	
+	/ MethodHeader { }
+	
+	UnaryMethodHeader : MethodHeader {
+		name : string;
+	}
+	
+	BinaryMethodHeader : MethodHeader {
+		message : Identifier;
+		argument : Identifier;
+	}
+	
+	KeywordMethodHeader : MethodHeader {
+		elements : KeywordMethodHeaderSegment*;
+	}
+	
+	KeywordMethodHeaderSegment {
+		keyword : Identifier;
+		argument : Identifier;
+	}
+	
+	ExecutableCode {
+		variables : Identifier*;
+		statements : Expression*;
+	}
+	
+	/ Expression { }
+	
+	ReturnStatement : Expression {
+		expr : Expression;
+	}
+	
+	AssignmentStatement : Expression {
+		variable : Identifier;
+		expr : Expression;
+	}
+	
+	KeywordExpression : Expression {
+		expr : Expression;
+		segments : KeywordMessageSegment*;
+	}
+	
+	KeywordMessageSegment {
+		keyword : Identifier;
+		expr : Expression;
+	}
+	
+	BinaryMessage : Expression {
+		left : Expression;
+		op : Identifier;
+		right : Expression;
+	}
+	
+	UnaryMessage : Expression {
+		expr : Expression;
+		message : Identifier;
+	}
+	
+	CascadedKeywordExpression : Expression {
+		expr : Expression;
+		segments : KeywordMessageSegment*;
+	}
+	
+	CascadedBinaryMessage : Expression {
+		left : Expression;
+		op : Identifier;
+		right : Expression;
+	}
+	
+	CascadedUnaryMessage : Expression {
+		expr : Expression;
+		message : Identifier;
+	}
+	
+	Variable : Expression {
+		name : string;
+	}
+	
+	Identifier {
+		name : string;
+	}
+	
+	/ Literal : Expression { } 
+	
+	IntegerLiteral : Literal {
+		value : string;
+	}
+	
+	CharacterLiteral : Literal {
+		value : string;
+	}
+	
+	FloatingPointLiteral : Literal {
+		value : string;
+	}
+	
+	StringLiteral : Literal {
+		value : string;
+	}
+	
+	SymbolLiteral : Literal {
+		value : string;
+	}
+	
+	ArrayLiteral : Literal {
+		elements : Literal*;
+	}
+	
+	ByteArrayLiteral : Expression {
+		elements : IntegerLiteral*;
+	}
+	
+	BlockLiteral : Expression {
+		arguments : Identifier*;
+		code : ExecutableCode;
+	}
+
+}

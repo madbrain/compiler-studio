@@ -1,0 +1,28 @@
+package $grmGen.package;
+
+import java.io.IOException;
+
+import org.xteam.cs.runtime.IErrorReporter;
+import org.xteam.cs.runtime.ILexer;
+import org.xteam.cs.runtime.IRuleReducer;
+import org.xteam.cs.runtime.IGLRRuleReducer;
+import org.xteam.cs.runtime.ISyntaxHelper;
+import org.xteam.cs.runtime.LRParser;
+import org.xteam.cs.runtime.GLRParser;
+import org.xteam.cs.runtime.ParseTables;
+
+public class ${grmGen.model.name}ParserFactory {
+	
+	public static LRParser createParser(ILexer lexer, IRuleReducer ruleReducer, ISyntaxHelper helper, IErrorReporter reporter) throws IOException {
+		return new LRParser(new ParseTables(
+			${grmGen.model.name}ParserFactory.class, "${grmGen.model.name}.gtb"),
+				lexer, ruleReducer, helper, reporter);
+	}
+	
+	public static GLRParser createGLRParser(ILexer lexer, IGLRRuleReducer ruleReducer, ISyntaxHelper helper, IErrorReporter reporter) throws IOException {
+		return new GLRParser(new ParseTables(
+			${grmGen.model.name}ParserFactory.class, "${grmGen.model.name}.gtb"),
+				lexer, helper, ruleReducer, reporter);
+	}
+	
+}

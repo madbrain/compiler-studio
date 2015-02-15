@@ -1,0 +1,24 @@
+package $lexGen.package;
+
+import org.xteam.cs.runtime.ISyntaxHelper;
+
+public class ${lexGen.model.name}SyntaxHelper implements ISyntaxHelper {
+
+	private static java.util.Map<Integer, String> names = new java.util.HashMap<Integer, String>();
+	
+	static {
+#foreach ($token in $lexGen.getTokens())
+		names.put($token, "$lexGen.getTokenDisplayName($token)");
+#end
+	}
+
+	@Override
+	public String getTokenString(int t) {
+		return names.get(t);
+	}
+	
+	@Override
+	public boolean isEof(int t) {
+		return t == $lexGen.getEofValue();
+	}
+}

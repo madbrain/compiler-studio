@@ -1,0 +1,18 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.xteam.compiler</groupId>
+    <artifactId>compiler-studio</artifactId>
+    <version>0.2-SNAPSHOT</version>
+  </parent>
+  <artifactId>compiler-studio-syntax</artifactId>
+  <name>Compiler Studio Syntax</name>
+
+  <dependencies>
+  	<dependency>
+  		<groupId>org.xteam</groupId>
+  		<artifactId>compiler-studio-runtime</artifactId>
+  		<version>0.2-SNAPSHOT</version>
+  	</dependency>
+  </dependencies>
+</project>

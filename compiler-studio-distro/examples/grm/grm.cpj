@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cs:project xmlns:cs="http://www.xteam.org/cs/project">
+	<cs:resource path="grm.grm"/>
+	<cs:resource path="grm.lex"/>
+</cs:project>
+

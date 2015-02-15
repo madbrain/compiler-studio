@@ -1,0 +1,14 @@
+
+def tutu(a, b) {
+	c = a * 2;
+	c = "$" + c + "$";
+	return c + b;
+}
+
+def hello(name) {
+	return "Hello " + name;
+}
+
+def main() {
+	print(hello(tutu(2, 4)));
+}

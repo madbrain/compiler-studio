@@ -1,0 +1,49 @@
+
+grammar Mini;
+
+lexer Mini;
+
+ast Mini;
+
+file ::= function_list -> MiniFile(functions);
+
+function_list ::= -> AstList();
+function_list ::= function_list function -> AstList();
+
+function ::= DEF ident LPAR argument_list_opt RPAR LBRC statement_list RBRC
+	-> Function(name, arguments, statements);
+
+argument_list_opt ::= -> AstList();
+argument_list_opt ::= argument_list;
+
+argument_list ::= ident -> AstList();
+argument_list ::= argument_list COMA ident -> AstList();
+
+statement_list ::= -> AstList();
+statement_list ::= statement_list statement -> AstList();
+
+statement ::= ident LPAR expr_list_opt RPAR SEMI -> FunctionStatement(name, arguments);
+statement ::= ident EQUAL expr SEMI -> Assignment(var, expr);
+statement ::= RETURN expr SEMI -> Return(expr);
+
+expr_list_opt ::= -> AstList();
+expr_list_opt ::= expr_list;
+
+expr_list ::= expr -> AstList();
+expr_list ::= expr_list COMA expr -> AstList();
+
+expr ::= muldiv_expr;
+expr ::= expr ADD muldiv_expr -> AddExpr(left, right);
+expr ::= expr SUB muldiv_expr -> SubExpr(left, right);
+
+muldiv_expr ::= primary;
+muldiv_expr ::= muldiv_expr MUL primary -> MulExpr(left, right);
+muldiv_expr ::= muldiv_expr DIV primary -> DivExpr(left, right); 
+
+primary ::= IDENT -> IdentExpr(name);
+primary ::= INT -> IntExpr(value);
+primary ::= STRING -> StringExpr(value);
+primary ::= ident LPAR expr_list_opt RPAR -> FunctionExpr(name, arguments);
+primary ::= LPAR expr RPAR;
+
+ident ::= IDENT -> Ident(name);

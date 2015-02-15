@@ -1,0 +1,9 @@
+package $lexGen.package;
+
+public interface ${lexGen.model.name}StateNames {
+	
+#foreach ($state in $lexGen.getStates())
+	public static final int $state.name = $lexGen.getStateValue($state);
+#end
+
+}

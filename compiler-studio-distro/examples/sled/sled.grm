@@ -1,0 +1,216 @@
+
+grammar Sled;
+
+lexer Sled;
+
+ast Sled;
+
+//terminal FIELDS, FIELDINFO, OF, LPAR, RPAR,
+//	COLO, IS, LBRT, RBRT, LBRC, RBRC,
+//	TO, COLUMNS, CHECKED, UNCHECKED, GUARANTEED,
+//	SPARSE, NAMES, COMA, EQUALS, PATTERNS, ANY, WHICH,
+//	RELOCATABLE, BIT, SIGNIFICANT, CONSTRUCTORS,
+//	WHEN, OTHERWISE, PLACEHOLDER, FOR,
+//	OR, SEMI, AND, DOTS, EPSILON, SOME, HAT, NE, LE,
+//	GE, LT, GT, PLUS, MINUS, TIMES, DIV, AT, EXCL, NEWLINE;
+	
+//terminal INT : Integer;
+//terminal IDENT, STRING, NOISE : String;
+
+start specfile;
+
+specfile ::= speclist -> SledFile(specs);
+
+speclist ::= -> AstList();
+speclist ::= speclist spec -> AstList();
+
+spec ::= FIELDS OF ident LPAR integer RPAR fieldlist -> FieldsSpec(name, size, fields);
+spec ::= FIELDINFO fieldinfolist -> FieldInfoSpec(infos);
+spec ::= RELOCATABLE identlist -> RelocatableSpec(vars);
+spec ::= BIT integer IS ident SIGNIFICANT -> BitSpec(zeroInt, value);
+spec ::= PATTERNS pattern_binding_list -> PatternsSpec(bindings);
+spec ::= CONSTRUCTORS constructor_list -> ConstructorsSpec(constructors);
+spec ::= PLACEHOLDER FOR ident IS pattern -> PlaceholderSpec(ident, pattern);
+spec ::= KEEP opcodelist -> KeepSpec(opcodes);
+
+fieldlist ::= -> AstList();
+fieldlist ::= fieldlist fieldspec -> AstList();
+
+fieldspec ::= ident integer high_value_opt -> FieldSpec(name, low, high);
+
+high_value_opt ::= ;
+high_value_opt ::= COLO integer ;
+
+fieldinfolist ::= -> AstList();
+fieldinfolist ::= fieldinfolist fieldinfo -> AstList();
+
+fieldinfo ::= ident_binding IS LBRT fielditemlist RBRT -> FieldInfo(idents, items);
+
+ident_binding ::= ident -> AstList();
+ident_binding ::= LBRT identlist_opt RBRT;
+
+identlist_opt ::= -> AstList();
+identlist_opt ::= identlist;
+identlist ::= ident -> AstList();
+identlist ::= identlist ident -> AstList();
+
+fielditemlist ::= -> AstList();
+fielditemlist ::= fielditemlist fielditem -> AstList();
+
+fielditem ::= CHECKED -> CheckedItem();
+fielditem ::= UNCHECKED -> UncheckedItem();
+fielditem ::= GUARANTEED -> GuaranteedItem();
+fielditem ::= SPARSE LBRT fieldname_binding_list RBRT -> SparseItem(bindings);
+fielditem ::= NAMES LBRT fieldnamelist RBRT -> NamesItem(names);
+
+fieldname_binding_list ::= fieldname_binding -> AstList();
+fieldname_binding_list ::= fieldname_binding_list COMA fieldname_binding -> AstList();
+
+fieldname_binding ::= fieldname EQUALS integer -> NameBinding(name, value);
+
+fieldnamelist ::= -> AstList();
+fieldnamelist ::= fieldnamelist fieldname -> AstList();
+
+fieldname ::= IDENT -> FieldName(value);
+fieldname ::= STRING -> FieldName(value);
+
+pattern_binding_list ::= -> AstList();
+pattern_binding_list ::= pattern_binding_list pattern_binding -> AstList();
+
+pattern_binding ::= ident IS pattern -> SimplePatternBinding (name, pattern);
+pattern_binding ::= ident IS ANY OF LBRT identlist_opt RBRT COMA WHICH IS pattern
+	-> AnyPatternBinding (name, names, pattern);
+pattern_binding ::= LBRT identlist_opt RBRT IS pattern -> ListPatternBinding (names, pattern);
+
+pattern ::= disjunct ;
+pattern ::= pattern OR disjunct -> OrPattern(left, right);
+
+disjunct ::= labeled_sequent ;
+disjunct ::= disjunct SEMI labeled_sequent -> SequentPattern(left, right);
+
+labeled_sequent ::= sequent;
+labeled_sequent ::= ident COLO sequent -> LabelPattern(ident, expr);
+
+sequent ::= conjunct ;
+sequent ::= sequent AND conjunct -> AndPattern(left, right);
+
+conjunct ::= DOTS dotsR -> PrefixPattern(expr);
+conjunct ::= dotsR ;
+
+dotsR ::= atomic ;
+dotsR ::= atomic DOTS -> SuffixPattern(expr);
+
+atomic ::= ident -> PatternIdent(ident);
+atomic ::= ident relop expr -> RelationPattern(ident, relop, expr);
+atomic ::= ident relop generator -> GeneratorPattern(ident, relop, generator);
+atomic ::= opcode LPAR explist RPAR -> CallPattern(opcode, arguments);
+atomic ::= LPAR pattern RPAR ;
+atomic ::= LBRT identlist_opt RBRT -> ListPattern(names);
+atomic ::= EPSILON -> EpsilonPattern();
+atomic ::= SOME ident -> SomePattern(ident);
+
+opname ::= IDENT -> IdentOpName(value);
+opname ::= STRING -> StringOpName(value);
+
+explist ::= expr -> AstList();
+explist ::= explist COMA expr -> AstList();
+
+relop ::= EQUALS -> EqOp();
+relop ::= NE -> NeOp();
+relop ::= LE -> LeOp();
+relop ::= GE -> GeOp();
+relop ::= LT -> LtOp();
+relop ::= GT -> GtOp();
+
+generator ::= LBRC integer TO integer columns_opt RBRC -> RangeGenerator(from, to, step);
+generator ::= LBRT integerlist_opt RBRT -> ListGenerator(values);
+columns_opt ::= ;
+columns_opt ::= COLUMNS integer ;
+
+expr ::= term ;
+expr ::= expr PLUS term -> AddExpr(left, right);
+expr ::= expr MINUS term -> SubExpr(left, right);
+
+term ::= factor ;
+term ::= term TIMES factor -> MulExpr(left, right);
+term ::= term DIV factor -> DivExpr(left, right);
+
+factor ::= LPAR expr RPAR ;
+factor ::= INT -> IntegerExpr(value);
+factor ::= STRING -> StringExpr(value);
+//factor ::= BLANK ; // NARY(WILDCARD, [])
+factor ::= extend ;
+//factor ::= ident LPAR explist RPAR ; // APP(mkopcode(idcode id,[]), ii2::ii3)
+factor ::= MINUS factor -> MinusExpr(expr);
+
+extend ::= bitrange;
+extend ::= bitrange EXCL -> ExtendExpr(expr);
+
+bitrange ::= ident_expr;
+bitrange ::= ident_expr AT LBRT integer high_value_opt RBRT -> BitRange(ident, low, high);
+
+ident_expr ::= IDENT -> IdentExpr(name);
+
+constructor_list ::= -> AstList();
+constructor_list ::= constructor_list constructor -> AstList();
+
+constructor ::= startnl opcode startop operands_opt type nlbranches
+	-> Constructor(opnames, operands, type, branches);
+
+startnl ::= -> lexer(NL);
+startop ::= -> lexer(NL->OPERAND);
+
+type ::= ;
+type ::= COLO ident ;
+
+opcode ::= opname -> AstList();
+opcode ::= opcode HAT opname -> AstList();
+
+opcodelist ::= -> AstList();
+opcodelist ::= opcodelist opcode -> AstList();
+
+operands_opt ::= -> AstList();
+operands_opt ::= operands ;
+
+operands ::= operand -> AstList();
+operands ::= operands operand -> AstList();
+
+operand ::= ident sign_opt -> IdentOperand(ident, extend);
+operand ::= NOISE -> NoiseOperand(value);
+operand ::= STRING -> NoiseOperand(value) ;
+
+sign_opt ::= ;
+sign_opt ::= EXCL -> ExtendFlag();
+
+nlbranches ::= NEWLINE branches_opt;
+nlbranches ::= branches;
+branches_opt ::= -> AstList();
+branches_opt ::= branches ;
+
+branches ::= single_branch -> AstList();
+branches ::= multiple_branches ;
+
+single_branch ::= LBRC equations RBRC IS pattern -> Branch(equations, pattern);
+single_branch ::= LBRC equations RBRC -> Branch(equations);
+single_branch ::= IS pattern -> Branch(pattern);
+
+multiple_branches ::= when_branch -> AstList();
+multiple_branches ::= multiple_branches multiple_branch_element -> AstList();
+multiple_branch_element ::= when_branch ;
+multiple_branch_element ::= otherwise_branch ;
+when_branch ::= WHEN LBRC equations RBRC IS pattern -> Branch(equations, pattern);
+otherwise_branch ::= OTHERWISE IS pattern -> Branch(pattern);
+
+equations ::= equation -> AstList();
+equations ::= equations COMA equation -> AstList();
+
+equation ::= expr relop expr -> Equation(left, relop, right);
+
+integerlist_opt ::= -> AstList();
+integerlist_opt ::= integerlist ;
+integerlist ::= integer -> AstList();
+integerlist ::= integerlist integer -> AstList();
+
+ident ::= IDENT -> Ident(name);
+integer ::= INT -> IntegerLiteral(value);
+string ::= STRING -> StringLiteral(value);

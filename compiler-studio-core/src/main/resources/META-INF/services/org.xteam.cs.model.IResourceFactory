@@ -1,0 +1,3 @@
+org.xteam.cs.ast.AstResourceFactory
+org.xteam.cs.grm.GrammarResourceFactory
+org.xteam.cs.lex.LexerResourceFactory

@@ -1,0 +1,261 @@
+
+grammar Pascal;
+
+import "pascal.ast";
+
+terminal AND, ARRAY, BEGIN, CASE, CONST, DIV, DO, DOWNTO, ELSE,
+	END, FOR, FILE, FUNCTION, FORWARD, GOTO, IF, IN, LABEL, MOD,
+	NIL, OF, OR, PACKED, PROCEDURE, PROGRAM, RECORD, REPEAT,
+	SET, THEN, TO, TYPE, UNTIL, VAR, WHILE, WITH;
+terminal LPAR, RPAR, LBRT, RBRT, SEMI, COMA, EQUALS,
+	COLO, RANGE, PLUS, MINUS, HAT, ASSIGN, DOT, STAR, SLASH,
+	LT, GT, LE, GE, NE, NOT; 
+	
+terminal IDENT, STRING, INTEGER, NUMBER : String;
+
+non terminal program, arguments_opt, block,
+	label_decls_opt, constant_defs_opt, constant_def_list, constant_def,
+	type_defs_opt, type_def_list, type_def, variable_decls_opt,
+	var_decls_list, var_decl,
+	proc_and_func_decls_opt, proc_and_func_decls_list,
+	proc_and_func_decl,
+	parameter_list_opt, parameter_list, parameter, var_opt;
+
+non terminal type_denoter, type_denoter_list,
+	identifier_or_conf_array_schema, field_list,
+	conf_array_schema, range_list, range, packed_opt,
+	field_type_list, field_type,
+	variant_part, variant_selector, variant_case_body,
+	variant_case_arm,
+	identifier_case_opt, constant_list;
+	
+non terminal statement, statement_list, real_statement,
+	variable_access, variable_access_list,
+	funcall_argument_list_opt, else_opt,
+	case_arm_list, case_arm, to_or_downto;
+
+non terminal constant, sign_opt, unsigned_number,
+	unsigned_number_or_identifier, expression,
+	expression_list, funcall_argument_list, funcall_argument,
+	funcall_expr_argument_list, funcall_expr_argument,
+	simple_expression, term, factor, plus_or_minus;
+
+non terminal identifier, identifier_list, integer_list,
+	integer, string_value;
+	
+start program;
+
+program ::= PROGRAM identifier arguments_opt SEMI block DOT -> Program(name, arguments, body);
+
+arguments_opt ::= -> AstList();
+arguments_opt ::= LPAR identifier_list RPAR;
+
+block ::= label_decls_opt constant_defs_opt type_defs_opt variable_decls_opt proc_and_func_decls_opt BEGIN statement_list END
+	-> Block(labels, constants, types, variables, functions, statements);
+
+label_decls_opt ::= -> AstList();
+label_decls_opt ::= LABEL integer_list SEMI;
+
+constant_defs_opt ::= -> AstList();
+constant_defs_opt ::= CONST constant_def_list;
+
+constant_def_list ::= constant_def -> AstList();
+constant_def_list ::= constant_def_list constant_def -> AstList();
+
+constant_def ::= identifier EQUALS constant SEMI -> ConstantDefinition(name, value);
+
+type_defs_opt ::= -> AstList();
+type_defs_opt ::= TYPE type_def_list;
+
+type_def_list ::= type_def -> AstList();
+type_def_list ::= type_def_list type_def -> AstList();
+
+type_def ::= identifier EQUALS type_denoter SEMI -> TypeDefinition(name, value);
+
+variable_decls_opt ::= -> AstList();
+variable_decls_opt ::= VAR var_decls_list;
+
+var_decls_list ::= var_decl -> AstList();
+var_decls_list ::= var_decls_list var_decl -> AstList();
+
+var_decl ::= identifier_list COLO type_denoter SEMI -> VariableDeclaration(names, type);
+
+statement_list ::= statement -> AstList();
+statement_list ::= statement_list SEMI statement -> AstList();
+
+proc_and_func_decls_opt ::= -> AstList();
+proc_and_func_decls_opt ::= proc_and_func_decls_list;
+
+proc_and_func_decls_list ::= proc_and_func_decl -> AstList();
+proc_and_func_decls_list ::= proc_and_func_decls_list proc_and_func_decl -> AstList();
+
+proc_and_func_decl ::= PROCEDURE identifier parameter_list_opt SEMI block SEMI -> Procedure(name, parameters, body);
+proc_and_func_decl ::= PROCEDURE identifier parameter_list_opt SEMI FORWARD SEMI -> Procedure(name, parameters);
+proc_and_func_decl ::= FUNCTION identifier parameter_list_opt COLO identifier SEMI block SEMI
+		-> Function(name, parameters, returnType, body);
+proc_and_func_decl ::= FUNCTION identifier parameter_list_opt COLO identifier SEMI FORWARD SEMI
+		-> Function(name, parameters, returnType);
+proc_and_func_decl ::= FUNCTION identifier SEMI block SEMI
+		-> Function(name, body);
+
+parameter_list_opt ::= -> AstList();
+parameter_list_opt ::= LPAR parameter_list RPAR;
+
+parameter_list ::= parameter -> AstList();
+parameter_list ::= parameter_list SEMI parameter -> AstList();
+
+parameter ::= var_opt identifier_list COLO identifier_or_conf_array_schema -> VariableParameter(flag, names, type);
+parameter ::= PROCEDURE identifier parameter_list_opt -> ProcedureParameter(name, parameters);
+parameter ::= FUNCTION identifier parameter_list_opt COLO identifier -> FunctionParameter(name, parameters, returnType);
+
+var_opt ::= ;
+var_opt ::= VAR -> VarFlag();
+
+identifier_or_conf_array_schema ::= identifier -> TypeReference(name);
+identifier_or_conf_array_schema ::= conf_array_schema;
+
+conf_array_schema ::= ARRAY LBRT range_list RBRT OF identifier_or_conf_array_schema -> ArraySchemaType(ranges, type);
+conf_array_schema ::= PACKED ARRAY LBRT range RBRT OF identifier -> PackedArraySchemaType(range, type);
+
+range_list ::= range -> AstList();
+range_list ::= range_list SEMI range -> AstList();
+
+range ::= identifier RANGE identifier COLO identifier -> Range(from, to, step);
+
+constant ::= unsigned_number_or_identifier;
+constant ::= PLUS unsigned_number_or_identifier;
+constant ::= MINUS unsigned_number_or_identifier;
+constant ::= STRING -> StringExpression(value);
+
+unsigned_number_or_identifier ::= unsigned_number;
+unsigned_number_or_identifier ::= IDENT -> IdentifierExpression(value);
+
+type_denoter_list ::= type_denoter -> AstList();
+type_denoter_list ::= type_denoter_list COMA type_denoter -> AstList();
+
+type_denoter ::= identifier -> TypeReference(name);
+type_denoter ::= LPAR identifier_list RPAR -> EnumType(names);
+type_denoter ::= constant RANGE constant -> RangeType(from, to);
+type_denoter ::= HAT identifier -> PointerType(type);
+type_denoter ::= packed_opt ARRAY LBRT type_denoter_list RBRT OF type_denoter -> ArrayType(flag, indexes, type);
+type_denoter ::= packed_opt RECORD field_list END -> RecordType(flag, body);
+type_denoter ::= packed_opt SET OF type_denoter -> SetType(flag, type);
+type_denoter ::= packed_opt FILE OF type_denoter -> FileType(flag, type);
+
+packed_opt ::= ;
+packed_opt ::= PACKED -> PackedFlag();
+
+field_list ::= -> FieldsAndVariant();
+field_list ::= field_type_list -> FieldsAndVariant(fields);
+field_list ::= field_type_list SEMI -> FieldsAndVariant(fields);
+field_list ::= field_type_list SEMI variant_part -> FieldsAndVariant(fields, variant);
+field_list ::= variant_part -> FieldsAndVariant(variant);
+
+field_type_list ::= field_type -> AstList();
+field_type_list ::= field_type_list SEMI field_type -> AstList();
+
+field_type ::= identifier COLO type_denoter -> Field(name, type);
+
+variant_part ::= CASE variant_selector OF variant_case_body -> RecordCase(selector, arms);
+variant_part ::= CASE variant_selector OF variant_case_body SEMI -> RecordCase(selector, arms);
+
+variant_selector ::= identifier -> VariantSelector(name);
+variant_selector ::= identifier COLO identifier -> VariantSelector(name, type);
+
+variant_case_body ::= variant_case_arm -> AstList();
+variant_case_body ::= variant_case_body SEMI variant_case_arm -> AstList();
+
+variant_case_arm ::= constant_list COLO LPAR field_list RPAR -> RecordCaseArm(values, body);
+
+statement ::= integer COLO real_statement -> LabelStatement(label, statement);
+statement ::= real_statement;
+
+real_statement ::= -> EmptyStatement();
+real_statement ::= variable_access ASSIGN expression -> Assignment(variable, expression);
+real_statement ::= identifier funcall_argument_list_opt-> FunctionCall(name, parameters);
+real_statement ::= GOTO integer -> Goto(label);
+real_statement ::= BEGIN statement_list END-> Compound(statements);
+real_statement ::= IF expression THEN statement else_opt -> If(condition, thenStatement, elseStatement);
+real_statement ::= CASE expression OF case_arm_list END -> Case(condition, arms);
+real_statement ::= CASE expression OF case_arm_list SEMI END -> Case(condition, arms);
+real_statement ::= REPEAT statement_list UNTIL expression -> RepeatUntil(statements, condition);
+real_statement ::= WHILE expression DO statement -> While(condition, statement);
+real_statement ::= FOR identifier ASSIGN expression to_or_downto expression DO statement -> For(variable, from, dir, to, statement);
+real_statement ::= WITH variable_access_list DO statement -> With(variables, statement);
+
+variable_access_list ::= variable_access -> AstList();
+variable_access_list ::= variable_access_list COMA variable_access -> AstList();
+
+variable_access ::= identifier -> VariableAccess(name);
+variable_access ::= variable_access LBRT expression_list RBRT -> ArrayAccess(expression, indexes);
+variable_access ::= variable_access DOT identifier -> FieldAccess(expression, name);
+variable_access ::= variable_access HAT -> PointerAccess(expression);
+
+funcall_argument_list_opt ::= -> AstList();
+funcall_argument_list_opt ::= LPAR funcall_argument_list RPAR;
+funcall_argument_list ::= funcall_argument -> AstList();
+funcall_argument_list ::= funcall_argument_list COMA funcall_argument -> AstList();
+
+funcall_argument ::= expression;
+funcall_argument ::= expression COLO expression -> FormatExpression(expr, width);
+funcall_argument ::= expression COLO expression COLO expression -> FormatExpression(expr, width, to);
+
+else_opt ::= ;
+else_opt ::= ELSE statement;
+
+to_or_downto ::= TO -> UpFlag();
+to_or_downto ::= DOWNTO -> DownFlag();
+
+case_arm_list ::= case_arm -> AstList();
+case_arm_list ::= case_arm_list SEMI case_arm -> AstList();
+
+case_arm ::= constant_list COLO statement -> CaseArm(constants, statement);
+
+expression_list ::= expression -> AstList();
+expression_list ::= expression_list COMA expression -> AstList();
+
+expression ::= simple_expression;
+expression ::= simple_expression EQUALS simple_expression;
+expression ::= simple_expression NE simple_expression;
+expression ::= simple_expression LT simple_expression;
+expression ::= simple_expression GT simple_expression;
+expression ::= simple_expression LE simple_expression;
+expression ::= simple_expression GE simple_expression;
+expression ::= simple_expression IN simple_expression;
+
+simple_expression ::= term;
+simple_expression ::= PLUS term;
+simple_expression ::= MINUS term;
+simple_expression ::= simple_expression PLUS term;
+simple_expression ::= simple_expression MINUS term;
+simple_expression ::= simple_expression OR term;
+
+term ::= factor;
+term ::= term STAR  factor;
+term ::= term SLASH factor;
+term ::= term DIV factor;
+term ::= term MOD factor;
+term ::= term AND factor;
+
+factor ::= NOT factor -> NotExpression(expression);
+factor ::= variable_access;
+factor ::= unsigned_number;
+factor ::= STRING -> StringExpression(value);
+factor ::= NIL -> NilExpression();
+factor ::= identifier LPAR funcall_argument_list RPAR -> FuncallExpression(name, arguments);
+factor ::= LPAR expression RPAR;
+
+constant_list ::= constant -> AstList();
+constant_list ::= constant_list COMA constant -> AstList();
+
+integer_list ::= integer -> AstList();
+integer_list ::= integer_list COMA integer -> AstList();
+
+identifier_list ::= identifier -> AstList();
+identifier_list ::= identifier_list COMA identifier -> AstList();
+
+unsigned_number ::= INTEGER -> IntegerExpression(value);
+unsigned_number ::= NUMBER -> NumberExpression(value);
+
+identifier ::= IDENT    -> Identifier(name);
+integer ::= INTEGER   -> IntegerValue(value);

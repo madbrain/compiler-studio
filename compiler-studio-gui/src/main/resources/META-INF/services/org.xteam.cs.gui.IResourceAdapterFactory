@@ -1,0 +1,5 @@
+org.xteam.cs.gui.grm.GrmFileAdapterFactory
+org.xteam.cs.gui.grm.TestConcreteParserResourceAdapterFactory
+org.xteam.cs.gui.grm.TestAstParserResourceAdapterFactory
+org.xteam.cs.gui.lex.LexerFileAdapterFactory
+org.xteam.cs.gui.lex.TestLexerResourceAdapterFactory

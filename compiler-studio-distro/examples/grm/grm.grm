@@ -1,0 +1,63 @@
+
+
+grammar Grm;
+
+lexer Grm;
+
+file ::= grammar_name import_opt declarations rules;
+	
+grammar_name ::= GRAMMAR ident SEMI;
+	
+import_opt ::= ;
+	
+import_opt ::= AST ident SEMI;
+
+import_opt ::= LEXER ident SEMI;
+	
+declarations ::= ;
+	
+declarations ::= declarations declaration;
+	
+declaration ::= TERMINAL ident_coma_list ident_opt SEMI;
+	
+declaration ::= START ident SEMI;
+	
+ident_opt ::= ;
+	
+ident_opt ::= COLO ident;
+	
+ident_coma_list ::= ident;
+	
+ident_coma_list ::= ident_coma_list COMA ident;
+	
+rules ::= ;
+	
+rules ::= rules rule;
+	
+rule ::= ident EQUALS ident_list constructor_opt SEMI;
+	
+ident_list ::= ;
+	
+ident_list ::= ident_list ident;
+	
+constructor_opt ::= ;
+	
+constructor_opt ::= ARROW ident LPAR binding_list_opt RPAR;
+	
+binding_list_opt ::= ;
+	
+binding_list_opt ::= binding_list;
+	
+binding_list ::= binding;
+	
+binding_list ::= binding_list COMA binding;
+	
+binding ::= IDENT;
+	
+binding ::= ident ASGN string;
+	
+ident ::= IDENT;
+	
+string ::= STRING;
+
+	

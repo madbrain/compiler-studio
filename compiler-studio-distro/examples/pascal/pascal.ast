@@ -1,0 +1,353 @@
+ast Pascal {
+
+	node Program {
+		ref name : Identifier;
+		ref arguments : Identifier*;
+		ref body : Block;
+		const ( name , arguments, body );
+	}
+	
+	node Block {
+		ref labels : IntegerValue*;
+		ref constants : ConstantDefinition*;
+		ref types : TypeDefinition*;
+		ref variables : VariableDeclaration*;
+		ref functions : FunctionDefinition*;
+		ref statements : Statement*;
+		const ( labels, constants, types, variables, functions, statements );
+	}
+	
+	node ConstantDefinition {
+		ref name : Identifier;
+		ref value : Expression;
+		const ( name, value );
+	}
+	
+	node TypeDefinition {
+		ref name  : Identifier;
+		ref value : Type;
+		const ( name, value );
+	}
+	
+	node VariableDeclaration {
+		ref names : Identifier*;
+		ref type : Type;
+		const ( names, type );
+	}
+	
+	abstract node FunctionDefinition { }
+	
+	node Procedure extends FunctionDefinition {
+		ref name : Identifier;
+		ref parameters : Parameter*;
+		ref body : Block;
+		const ( name, parameters, body );
+		const ( name, parameters );
+	}
+	
+	node Function extends FunctionDefinition {
+		ref name : Identifier;
+		ref parameters : Parameter*;
+		ref returnType : Identifier;
+		ref body : Block;
+		const ( name, parameters, returnType, body );
+		const ( name, parameters, returnType );
+		const ( name, body );
+	}
+	
+	abstract node Parameter {
+	}
+	
+	node VariableParameter extends Parameter {
+		ref flag  : VarFlag;
+		ref names : Identifier*;
+		ref type  : Type;
+		const (flag, names, type);
+	}
+	
+	node ProcedureParameter extends Parameter {
+		ref name : Identifier;
+		ref parameters : Parameter*;
+		const (name, parameters);
+	}
+	
+	node FunctionParameter extends Parameter {
+		ref name : Identifier;
+		ref parameters : Parameter*;
+		ref returnType : Identifier;
+		const (name, parameters, returnType);
+	}
+	
+	node VarFlag { }
+	
+	abstract node Type { }
+	
+	node ReferenceType extends Type {
+		ref name : Identifier;
+		const ( name );
+	}
+	
+	node ArraySchemaType extends Type {
+		ref ranges : Range*;
+		ref type   : Type;
+		const (ranges, type);
+	}
+	
+	node PackedArraySchemaType extends Type {
+		ref range : Range;
+		ref type  : Identifier;
+		const (range, type);
+	}
+	
+	node Range {
+		ref from : Identifier;
+		ref to   : Identifier;
+		ref step : Identifier;
+		const (from, to, step);
+	}
+	
+	node TypeReference extends Type {
+		ref name : Identifier;
+		const (name);
+	}
+	
+	node EnumType extends Type {
+		ref names : Identifier*;
+		const (names);
+	}
+	
+	node RangeType extends Type {
+		ref from : Expression;
+		ref to   : Expression;
+		const (from, to);
+	}
+	
+	node PointerType extends Type {
+		ref type : Identifier;
+		const (type);
+	}
+	
+	node ArrayType extends Type {
+		ref flag : PackedFlag;
+		ref type : Type;
+		ref indexes : Type*;
+		const (flag, indexes, type);
+	}
+	
+	node RecordType extends Type {
+		ref flag : PackedFlag;
+		ref body : FieldsAndVariant;
+		const (flag, body);
+	}
+	
+	node FieldsAndVariant {
+		ref fields : Field*;
+		ref variant : RecordCase;
+		const ();
+		const (fields);
+		const (fields, variant);
+		const (variant);
+	}
+	
+	node RecordCase {
+		ref selector : VariantSelector;
+		ref arms : RecordCaseArm*;
+		const(selector, arms);
+	}
+	
+	node VariantSelector {
+		ref name : Identifier;
+		ref type : Identifier;
+		const(name);
+		const(name, type);
+	}
+	
+	node RecordCaseArm {
+		ref values : Expression*;
+		ref body : FieldsAndVariant;
+		const (values, body);
+	}
+	
+	node Field {
+		ref name : Identifier;
+		ref type : Type;
+		const (name, type);
+	}
+	
+	node SetType extends Type {
+		ref flag : PackedFlag;
+		ref type : Type;
+		const (flag, type);
+	}
+	
+	node FileType extends Type {
+		ref flag : PackedFlag;
+		ref type : Type;
+		const (flag, type);
+	}
+	
+	node PackedFlag { }
+	
+	abstract node Statement { }
+	
+	node EmptyStatement extends Statement {
+		const ();
+	}
+	
+	node LabelStatement extends Statement {
+		ref label : IntegerValue;
+		ref statement : Statement;
+		const (label, statement);
+	}
+	
+	node Assignment extends Statement {
+		ref variable : Access;
+		ref expression : Expression;
+		const (variable, expression);
+	}
+	
+	node FunctionCall extends Statement {
+		ref name : Identifier;
+		ref parameters : Expression*;
+		const (name, parameters);
+	}
+	
+	node Goto extends Statement {
+		ref label : IntegerValue;
+		const (label);
+	}
+	
+	node Compound extends Statement {
+		ref statements : Statement*;
+		const (statements);
+	}
+	
+	node If extends Statement {
+		ref condition : Expression;
+		ref thenStatement : Statement;
+		ref elseStatement : Statement;
+		const (condition, thenStatement, elseStatement);
+	}
+	
+	node Case extends Statement {
+		ref condition : Expression;
+		ref arms : CaseArm*;
+		const (condition, arms);
+	}
+	
+	node CaseArm {
+		ref constants : Expression*;
+		ref statement : Statement;
+		const (constants, statement);
+	}
+	
+	node RepeatUntil extends Statement {
+		ref condition : Expression;
+		ref statements : Statement*;
+		const (statements, condition);
+	}
+	
+	node While extends Statement {
+		ref condition : Expression;
+		ref statement : Statement;
+		const (condition, statement);
+	}
+	
+	node For extends Statement {
+		ref variable : Identifier;
+		ref from : Expression;
+		ref to : Expression;
+		ref dir : DirectionFlag;
+		ref statement : Statement;
+		const (variable, from, dir, to, statement);
+	}
+	
+	node With extends Statement {
+		ref variables : Access*;
+		ref statement : Statement;
+		const (variables, statement);
+	}
+	
+	abstract node DirectionFlag { }
+	node UpFlag extends DirectionFlag { }
+	node DownFlag extends DirectionFlag { }
+	
+	abstract node Access extends Expression { }
+	
+	node VariableAccess extends Access {
+		ref name : Identifier;
+		const (name);
+	}
+	
+	node ArrayAccess extends Access {
+		ref expression : Access;
+		ref indexes : Expression*;
+		const (expression, indexes);
+	}
+	
+	node FieldAccess extends Access {
+		ref expression : Access;
+		ref name : Identifier;
+		const (expression, name);
+	}
+	
+	node PointerAccess extends Access {
+		ref expression : Access;
+		const (expression);
+	}
+	
+	node NotExpression extends Expression {
+		ref expression : Expression;
+		const (expression);
+	}
+	
+	abstract node Expression { }
+	
+	node FormatExpression extends Expression {
+		ref expr : Expression;
+		ref width : Expression;
+		ref to : Expression;
+		const (expr, width);
+		const (expr, width, to);
+	}
+	
+	node IdentifierExpression extends Expression {
+		attr value : String;
+		const (value);
+	}
+	
+	node StringExpression extends Expression {
+		attr value : String;
+		const (value);
+	}
+	
+	node NumberExpression extends Expression {
+		attr value : String;
+		const (value);
+	}
+	
+	node IntegerExpression extends Expression {
+		attr value : String;
+		const (value);
+	}
+	
+	node NilExpression extends Expression {
+	}
+	
+	node FuncallExpression extends Expression {
+		ref name : Identifier;
+		ref arguments : Expression*;
+		const (name, arguments);
+	}
+	
+	node Identifier {
+		attr name : String;
+		const (name);
+	}
+	
+	node IntegerValue {
+		attr value : String;
+		const (value);
+	}
+	
+}

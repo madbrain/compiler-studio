@@ -1,0 +1,11 @@
+package $astGen.package;
+
+public interface I${astGen.model.name}Visitor {
+
+#foreach ($node in $astGen.model.nodes)
+#if (! $node.abstract)
+	void visit${node.name}(${node.name} a${node.name});
+	
+#end
+#end
+}

@@ -1,0 +1,19 @@
+package $grmGen.package;
+
+import org.xteam.cs.runtime.ISyntaxHelper;
+
+public class ${grmGen.model.name}SyntaxHelper implements ISyntaxHelper, I${grmGen.model.name}Tokens {
+
+	private static java.util.Map<Integer, String> names = new java.util.HashMap<Integer, String>();
+	
+	static {
+#foreach ($token in $grmGen.getTokens())
+		names.put($token, "$token.name");
+#end
+	}
+
+	@Override
+	public String getTokenString(int t) {
+		return names.get(t);
+	}
+}

@@ -1,0 +1,270 @@
+// sled.ast defines the AST for SLED language
+
+Sled {
+
+	SledFile {
+		specs : Spec*;
+	}
+	
+	/Spec;
+	
+	FieldsSpec : Spec {
+		name : Ident;
+		size : IntegerLiteral;
+		fields : FieldSpec*;
+	}
+	
+	FieldSpec {
+		name : Ident;
+		low  : IntegerLiteral;
+		high : IntegerLiteral;
+	}
+	
+	FieldInfoSpec : Spec {
+		infos : FieldInfo*;
+	}
+	
+	FieldInfo {
+		idents : Ident*;
+		items  : FieldInfoItem*;
+	}
+	
+	/FieldInfoItem;
+	
+	CheckedItem : FieldInfoItem;
+	
+	UncheckedItem : FieldInfoItem;
+	
+	GuaranteedItem : FieldInfoItem;
+	
+	SparseItem : FieldInfoItem {
+		bindings : NameBinding*;
+	}
+	
+	NameBinding {
+		name : FieldName;
+		value : IntegerLiteral;
+	}
+	
+	NamesItem : FieldInfoItem {
+		names : FieldName*;
+	}
+	
+	FieldName {
+		value : string;
+	}
+	
+	RelocatableSpec : Spec {
+        vars : Ident*;
+    }
+
+    BitSpec : Spec {
+        zeroInt : IntegerLiteral;
+        value : Ident;
+    }
+	
+	PatternsSpec : Spec {
+		bindings : PatternBinding*;
+	}
+
+	KeepSpec : Spec {
+		opcodes : OpName**;
+	}
+	
+	/PatternBinding;
+	
+	SimplePatternBinding : PatternBinding {
+		name : Ident;
+		pattern : AbstractPattern;
+	}
+	
+	AnyPatternBinding : PatternBinding {
+		name : Ident;
+		names : Ident*;
+		pattern : AbstractPattern;
+	}
+	
+	ListPatternBinding : PatternBinding {
+		names : Ident*;
+		pattern : AbstractPattern;
+	}
+	
+	/AbstractPattern;
+	
+	/BinaryPattern : AbstractPattern {
+		left  : AbstractPattern;
+		right : AbstractPattern;
+	}
+	
+	OrPattern : BinaryPattern;
+	
+	SequentPattern : BinaryPattern;
+	
+	LabelPattern : AbstractPattern {
+		ident  : Ident;
+		expr : AbstractPattern;
+	}
+	
+	AndPattern : BinaryPattern;
+	
+	PrefixPattern : AbstractPattern {
+		expr : AbstractPattern;
+	}
+	
+	SuffixPattern : AbstractPattern {
+		expr : AbstractPattern;
+	}
+	
+	PatternIdent : AbstractPattern {
+		ident : Ident;
+	}
+	
+	RelationPattern : AbstractPattern {
+		ident : Ident;
+		relop : Relop;
+		expr  : Expr;
+	}
+	
+	GeneratorPattern : AbstractPattern {
+		ident : Ident;
+		relop : Relop;
+		generator : Generator;
+	}
+	
+	/ Relop;
+	EqOp : Relop;
+	NeOp : Relop;
+	LeOp : Relop;
+	GeOp : Relop;
+	LtOp : Relop;
+	GtOp : Relop;
+	
+	/ OpName {
+		value : string;
+	}
+	
+	IdentOpName : OpName;
+	
+	StringOpName : OpName;
+	
+	/ Generator;
+	
+	RangeGenerator : Generator {
+		from : IntegerLiteral;
+		to   : IntegerLiteral;
+		step : IntegerLiteral;
+	}
+	
+	ListGenerator : Generator {
+		values : IntegerLiteral*;
+	}
+	
+	ListPattern : AbstractPattern {
+		names : Ident*;
+	}
+	
+	EpsilonPattern : AbstractPattern;
+	
+	SomePattern : AbstractPattern {
+		ident : Ident;
+	}
+	
+	CallPattern : AbstractPattern {
+		opcode : OpName*;
+		arguments : Expr*;
+	}
+	
+	/ Expr;
+	
+	/ BinaryExpr : Expr {
+		left : Expr;
+		right : Expr;
+	}
+	
+	AddExpr : BinaryExpr;
+	
+	SubExpr : BinaryExpr;
+	
+	MulExpr : BinaryExpr;
+	
+	DivExpr : BinaryExpr;
+	
+	MinusExpr : Expr {
+		expr : Expr;
+	}
+	
+	ExtendExpr : Expr {
+		expr : Expr; 
+	}
+	
+	IdentExpr : Expr {
+		name : string;
+	}
+	
+	BitRange : Expr {
+		ident : IdentExpr;
+		low : IntegerLiteral;
+		high : IntegerLiteral;
+	}
+	
+	IntegerExpr : Expr {
+		value : int;
+	}
+	
+	StringExpr : Expr {
+		value : string;
+	}
+	
+	ConstructorsSpec : Spec {
+		constructors : Constructor*;
+	}
+	
+	Constructor {
+		opnames  : OpName*;
+		operands : Operand*;
+		type : Ident;
+		branches : Branch*;
+	}
+	
+	/Operand;
+	
+	IdentOperand : Operand {
+		ident  : Ident;
+		extend : ExtendFlag;
+	}
+	
+	ExtendFlag;
+	
+	NoiseOperand : Operand {
+		value : string;
+	}
+	
+	Branch {
+		equations : Equation*;
+		pattern : AbstractPattern;
+	}
+	
+	Equation {
+		left  : Expr;
+		relop : Relop;
+		right : Expr;
+	}
+	
+	PlaceholderSpec : Spec {
+		ident : Ident;
+		pattern : AbstractPattern;
+	}
+	
+	Ident {
+		name : string;
+	}
+	
+	IntegerLiteral {
+		value : int;
+	}
+	
+	StringLiteral {
+		value : string;
+	}
+
+}

@@ -1,0 +1,35 @@
+Ast {
+
+	AstFile {
+		name : Ident;
+		nodes : Node*;
+	}
+
+	Node {
+		abstractFlag : AbstractFlag;
+		name : Ident;
+		superNode : Ident;
+		items : NodeItem*;
+	}
+
+	AbstractFlag {}
+
+	NodeItem {
+		name : Ident;
+		type : Type;
+	}
+
+	/ Type {}
+
+	SimpleType : Type {
+		name : string;
+	}
+
+	RepeatableType : Type {
+		base : Type;
+	}
+
+	Ident {
+		name : string;
+	}
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.xteam.org/cs/project">
+    <property name="sourceFolder" value="src-gen"/>
+    <property name="addSampleMain" value="false"/>
+    <property name="mainPackage" value="org.xteam.cpp.parser"/>
+    <resource path="cpp.lex">
+        <property name="lexerPackage" value="lexer"/>
+        <property name="doKeywordOptimize" value="false"/>
+    </resource>
+</project>

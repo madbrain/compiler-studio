@@ -1,0 +1,45 @@
+Expr {
+
+	File {
+		stmts : Statement*;
+	}
+
+	/Statement {}
+
+	ExprStatement : Statement {
+		expr : Expr;
+	}
+
+	AssignmentStatement : Statement {
+		variable : Identifier;
+		expr     : Expr;
+	}
+
+	/Expr {}
+
+	VariableExpr : Expr {
+		name : string;
+	}
+
+	IntegerExpr : Expr {
+		value : string;
+	}
+
+	NegateExpr : Expr {
+		expr : Expr;
+	}
+
+	/BinaryExpr : Expr {
+		left  : Expr;
+		right : Expr;
+	}
+
+	AddExpr : BinaryExpr {}
+	SubExpr : BinaryExpr {}
+	MulExpr : BinaryExpr {}
+	DivExpr : BinaryExpr {}
+
+	Identifier {
+		name : string;
+	}
+}

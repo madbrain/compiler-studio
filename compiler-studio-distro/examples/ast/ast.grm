@@ -1,0 +1,30 @@
+
+grammar Ast;
+
+lexer Ast;
+
+ast Ast;
+
+file ::= ident LBRC nodelist RBRC -> AstFile(name, nodes);
+
+nodelist ::= -> AstList();
+nodelist ::= nodelist node -> AstList();
+
+node ::= abstract_opt ident extends_opt LBRC nodeitemlist RBRC
+	-> Node(abstractFlag, name, superNode, items);
+
+abstract_opt ::= ;
+abstract_opt ::= SLASH -> AbstractFlag();
+
+extends_opt ::= ;
+extends_opt ::= COLO ident;
+
+nodeitemlist ::= -> AstList();
+nodeitemlist ::= nodeitemlist nodeitem -> AstList();
+
+nodeitem ::= ident COLO type SEMI -> NodeItem(name, type);
+
+type ::= IDENT -> SimpleType(name);
+type ::= type STAR -> RepeatableType(base);
+
+ident ::= IDENT -> Ident(name);

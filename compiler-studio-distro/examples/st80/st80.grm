@@ -1,0 +1,136 @@
+
+grammar St80;
+
+lexer St80;
+
+ast St80;
+
+//terminal DO_METHOD, DO_CODE;
+
+//Start ::= DO_METHOD MethodDeclaration;
+//Start ::= DO_CODE ExecutableCode;
+
+MethodDeclaration ::= MethodHeader ExecutableCode -> MethodDeclaration(header, code);
+
+MethodHeader ::= UnaryMethodHeader;
+MethodHeader ::= BinaryMethodHeader;
+MethodHeader ::= KeywordMethodHeader;
+
+UnaryMethodHeader ::= IDENTIFIER -> UnaryMethodHeader(name);
+
+BinaryMessageSelector ::= BINARY_SELECTOR -> Identifier(name);
+BinaryMessageSelector ::= PIPE -> Identifier(name->"|");
+
+BinaryMethodHeader ::= BinaryMessageSelector Identifier -> BinaryMethodHeader(message, argument);
+
+KeywordMethodHeader ::= KeywordMethodHeaderSegmentList -> KeywordMethodHeader(elements);
+KeywordMethodHeaderSegmentList ::= KeywordMethodHeaderSegment -> AstList();
+KeywordMethodHeaderSegmentList ::= KeywordMethodHeaderSegmentList KeywordMethodHeaderSegment -> AstList();
+KeywordMethodHeaderSegment ::= Keyword Identifier -> KeywordMethodHeaderSegment(keyword, argument);
+
+ExecutableCode ::= LocalVariableDeclarationListOpt StatementListOpt -> ExecutableCode(variables, statements);
+
+LocalVariableDeclarationListOpt ::= -> AstList();
+LocalVariableDeclarationListOpt ::= LocalVariableDeclarationList;
+LocalVariableDeclarationList ::= PIPE BindableIdentifierListOpt PIPE;
+BindableIdentifierListOpt ::= -> AstList();
+BindableIdentifierListOpt ::= BindableIdentifierList;
+BindableIdentifierList ::= Identifier -> AstList();
+BindableIdentifierList ::= BindableIdentifierList Identifier -> AstList();
+
+StatementListOpt ::= -> AstList();
+StatementListOpt ::= StatementList DotOpt;
+StatementList ::= ReturnStatement -> AstList();
+StatementList ::= StatementList DOT ReturnStatement -> AstList();
+
+DotOpt ::= ;
+DotOpt ::= DOT;
+
+ReturnStatement ::= Statement;
+ReturnStatement ::= HAT Statement -> ReturnStatement(expr);
+
+Statement ::= Expression;
+Statement ::= Identifier ASSIGN Statement -> AssignmentStatement(variable, expr);
+
+Expression ::= CascadedExpression;
+
+CascadedExpression ::= KeywordExpression;
+CascadedExpression ::= CascadedKeywordExpressionWithUnary;
+CascadedExpression ::= CascadedKeywordExpressionWithBinary;
+CascadedExpression ::= CascadedExpression SEMI KeywordMessage -> CascadedKeywordExpression(expr, segments);
+
+CascadedKeywordExpressionWithUnary ::= CascadedBinaryExpressionWithUnary;
+CascadedKeywordExpressionWithUnary ::= CascadedBinaryExpressionWithUnary KeywordMessage -> CascadedKeywordExpression(expr, segments);
+
+CascadedBinaryExpressionWithUnary ::= CascadedUnaryExpression;
+CascadedBinaryExpressionWithUnary ::= CascadedBinaryExpressionWithUnary BinaryMessageSelector UnaryExpression -> CascadedBinaryMessage(left, op, right);
+
+CascadedUnaryExpression ::= CascadedExpression SEMI Identifier -> CascadedUnaryMessage(expr, message);
+CascadedUnaryExpression ::= CascadedUnaryExpression Identifier -> CascadedUnaryMessage(expr, message);
+
+CascadedKeywordExpressionWithBinary ::= CascadedBinaryExpression;
+CascadedKeywordExpressionWithBinary ::= CascadedBinaryExpression KeywordMessage -> CascadedKeywordExpression(expr, segments);
+
+CascadedBinaryExpression ::= CascadedExpression SEMI BinaryMessageSelector UnaryExpression -> CascadedBinaryMessage(left, op, right);
+CascadedBinaryExpression ::= CascadedBinaryExpression BinaryMessageSelector UnaryExpression -> CascadedBinaryMessage(left, op, right);
+
+KeywordExpression ::= BinaryExpression;
+KeywordExpression ::= BinaryExpression KeywordMessage -> KeywordExpression(expr, segments);
+
+KeywordMessage ::= KeywordMessageSegment -> AstList();
+KeywordMessage ::= KeywordMessage KeywordMessageSegment -> AstList();
+KeywordMessageSegment ::= Keyword BinaryExpression -> KeywordMessageSegment(keyword, expr);
+
+BinaryExpression ::= UnaryExpression;
+BinaryExpression ::= BinaryExpression BinaryMessageSelector UnaryExpression -> BinaryMessage(left, op, right);
+
+UnaryExpression ::= Operand;
+UnaryExpression ::= UnaryExpression Identifier -> UnaryMessage(expr, message);
+
+Operand ::= Literal;
+Operand ::= IDENTIFIER -> Variable(name);
+Operand ::= LPAR Statement RPAR;
+
+Literal ::= INTEGER_LITERAL -> IntegerLiteral(value);
+Literal ::= SCALED_DECIMAL_LITERAL -> IntegerLiteral(value);
+Literal ::= FLOATING_POINT_LITERAL -> FloatingPointLiteral(value);
+Literal ::= CHARACTER_LITERAL -> CharacterLiteral(value);
+Literal ::= STRING_LITERAL -> StringLiteral(value);
+Literal ::= SYMBOL_LITERAL -> SymbolLiteral(value);
+Literal ::= ObjectArrayLiteral;
+Literal ::= ByteArrayLiteral;
+Literal ::= BlockLiteral;
+
+ByteArrayLiteral ::= START_BYTE UnsignedIntegerLiteralListOpt RBRT -> ByteArrayLiteral(elements);
+UnsignedIntegerLiteralListOpt ::= -> AstList();
+UnsignedIntegerLiteralListOpt ::= UnsignedIntegerLiteralList;
+UnsignedIntegerLiteralList ::= Integer -> AstList();
+UnsignedIntegerLiteralList ::= UnsignedIntegerLiteralList Integer -> AstList();
+Integer ::= INTEGER_LITERAL -> IntegerLiteral(value); 
+
+ObjectArrayLiteral ::= START_ARRAY LiteralArrayElementListOpt RPAR -> ArrayLiteral(elements);
+LiteralArrayElementListOpt ::= -> AstList();
+LiteralArrayElementListOpt ::= LiteralArrayElementList;
+LiteralArrayElementList ::= LiteralArrayElement -> AstList();
+LiteralArrayElementList ::= LiteralArrayElementList LiteralArrayElement -> AstList();
+LiteralArrayElement ::= INTEGER_LITERAL -> IntegerLiteral(value);
+LiteralArrayElement ::= SCALED_DECIMAL_LITERAL -> IntegerLiteral(value);
+LiteralArrayElement ::= FLOATING_POINT_LITERAL -> FloatingPointLiteral(value);
+LiteralArrayElement ::= CHARACTER_LITERAL -> CharacterLiteral(value);
+LiteralArrayElement ::= STRING_LITERAL -> StringLiteral(value);
+LiteralArrayElement ::= SYMBOL_LITERAL -> SymbolLiteral(value);
+LiteralArrayElement ::= LPAR LiteralArrayElementListOpt RPAR -> ArrayLiteral(elements);
+LiteralArrayElement ::= IDENTIFIER -> SymbolLiteral(value);
+LiteralArrayElement ::= KEYWORD -> SymbolLiteral(value);
+LiteralArrayElement ::= BINARY_SELECTOR -> SymbolLiteral(value);
+LiteralArrayElement ::= PIPE -> SymbolLiteral(value->"|");
+
+BlockLiteral ::= LBRT FormalBlockArgumentDeclarationListOpt ExecutableCode RBRT -> BlockLiteral(arguments, code);
+FormalBlockArgumentDeclarationListOpt ::= -> AstList();
+FormalBlockArgumentDeclarationListOpt ::= FormalBlockArgumentDeclarationList PIPE;
+FormalBlockArgumentDeclarationList ::= FormalBlockArgumentDeclaration -> AstList();
+FormalBlockArgumentDeclarationList ::= FormalBlockArgumentDeclarationList FormalBlockArgumentDeclaration -> AstList();
+FormalBlockArgumentDeclaration ::= COLON Identifier;
+
+Identifier ::= IDENTIFIER -> Identifier(name);
+Keyword ::= KEYWORD -> Identifier(name); 
